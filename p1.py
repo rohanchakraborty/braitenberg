@@ -46,6 +46,20 @@ def update_heading(heading, sl, sr, mode='aggression'):
         # More light causes faster turning away from the light
         d_phi = TURN_ANGLE * (sl - sr)
     return (heading + d_phi) % (2 * PI)
+    
+def plot_light_distribution():
+    # Create a grid of points and calculate light intensity at each point
+    grid_x, grid_y = np.meshgrid(np.linspace(0, 1, 100), np.linspace(0, 1, 100))
+    intensity = light_intensity(grid_x, grid_y)
+    plt.figure(figsize=(10, 8))
+    plt.imshow(intensity, origin='lower', extent=(0, 1, 0, 1), cmap='viridis')
+    plt.colorbar(label='Light Intensity')
+    plt.scatter([LIGHT_X], [LIGHT_Y], color='red', s=100, label='Light Source')
+    plt.title('Light Intensity Distribution')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.legend()
+    plt.show()
 
 def main(mode='aggression'):
     x, y = 0.1, 0.9  # Initial position
@@ -63,6 +77,8 @@ def main(mode='aggression'):
         x, y = adjust_position(x_new, y_new)
         trajectory.append((x, y))
     name = f'Part1_plot_{mode}'
+    # Plotting light dist
+    plot_light_distribution()
     # Plotting trajectory
     plt.figure(figsize=(10, 8))
     xs, ys = zip(*trajectory)
