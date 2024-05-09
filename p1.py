@@ -17,9 +17,23 @@ def adjust_position(x, y):
     return x % 1, y % 1
 
 def light_intensity(x, y):
-    # Calculate light intensity based on distance from the light source
-    distance = math.sqrt((x - LIGHT_X)**2 + (y - LIGHT_Y)**2)
-    return max(0, 1 - distance)  # Assuming light intensity decreases linearly with distance
+    # Calculate light intensity based on distance from the light source using NumPy operations
+    distance = np.sqrt((x - LIGHT_X)**2 + (y - LIGHT_Y)**2)
+    return np.maximum(0, 1 - distance)  # Assuming light intensity decreases linearly with distance
+
+def plot_light_distribution():
+    # Create a grid of points and calculate light intensity at each point
+    grid_x, grid_y = np.meshgrid(np.linspace(0, 1, 100), np.linspace(0, 1, 100))
+    intensity = light_intensity(grid_x, grid_y)
+    plt.figure(figsize=(10, 8))
+    plt.imshow(intensity, origin='lower', extent=(0, 1, 0, 1), cmap='viridis')
+    plt.colorbar(label='Light Intensity')
+    plt.scatter([LIGHT_X], [LIGHT_Y], color='red', s=100, label='Light Source')
+    plt.title('Light Intensity Distribution')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.legend()
+    plt.show()
 
 def get_sensor_positions(x, y, heading):
     # Calculate positions of left and right sensors based on current position and heading
@@ -46,20 +60,8 @@ def update_heading(heading, sl, sr, mode='aggression'):
         # More light causes faster turning away from the light
         d_phi = TURN_ANGLE * (sl - sr)
     return (heading + d_phi) % (2 * PI)
-    
-def plot_light_distribution():
-    # Create a grid of points and calculate light intensity at each point
-    grid_x, grid_y = np.meshgrid(np.linspace(0, 1, 100), np.linspace(0, 1, 100))
-    intensity = light_intensity(grid_x, grid_y)
-    plt.figure(figsize=(10, 8))
-    plt.imshow(intensity, origin='lower', extent=(0, 1, 0, 1), cmap='viridis')
-    plt.colorbar(label='Light Intensity')
-    plt.scatter([LIGHT_X], [LIGHT_Y], color='red', s=100, label='Light Source')
-    plt.title('Light Intensity Distribution')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.legend()
-    plt.show()
+
+
 
 def main(mode='aggression'):
     x, y = 0.1, 0.9  # Initial position
@@ -76,10 +78,9 @@ def main(mode='aggression'):
         y_new = (y + SPEED * math.sin(heading)) % 1
         x, y = adjust_position(x_new, y_new)
         trajectory.append((x, y))
-    name = f'Part1_plot_{mode}'
-    # Plotting light dist
+
+    # Plotting trajectory and light intensity
     plot_light_distribution()
-    # Plotting trajectory
     plt.figure(figsize=(10, 8))
     xs, ys = zip(*trajectory)
     plt.plot(xs, ys, 'b-', lw=1, label=f'Trajectory - {mode}')
@@ -88,8 +89,8 @@ def main(mode='aggression'):
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.legend()
-    plt.savefig(name+'.png')
     plt.show()
 
 if __name__ == "__main__":
     main(mode='fear')  # Change to 'fear' to test the other behavior
+
